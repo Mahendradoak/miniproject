@@ -4,7 +4,8 @@ import '../../models/job.dart';
 import '../../widgets/job_card.dart';
 import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
-import 'profile_screen.dart';
+import 'profile_hub_screen.dart';
+import '../job_seeker/swipe_jobs_screen.dart';
 
 class JobSeekerHomeScreen extends StatefulWidget {
   const JobSeekerHomeScreen({super.key});
@@ -67,7 +68,7 @@ class _JobSeekerHomeScreenState extends State<JobSeekerHomeScreen>
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const SwipeJobsScreen()),
                 );
               },
             ),
@@ -160,7 +161,7 @@ class _JobSeekerHomeScreenState extends State<JobSeekerHomeScreen>
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const ProfileHubScreen()),
                 );
               },
               icon: const Icon(Icons.person),
@@ -739,7 +740,7 @@ Widget build(BuildContext context) {
         if (index == 2) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            MaterialPageRoute(builder: (context) => const ProfileHubScreen()),
           );
         } else {
           setState(() => _selectedIndex = index);

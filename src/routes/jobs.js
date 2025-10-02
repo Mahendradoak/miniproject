@@ -3,8 +3,13 @@ const router = express.Router();
 const Job = require('../models/Job');
 const JobMatchingService = require('../services/matchingService');
 const { protect, authorize } = require('../middleware/auth');
+const { validateJobCreate, validatePagination } = require('../middleware/validation');
+const { cacheMiddleware } = require('../utils/cache');
 
-router.post('/', protect, authorize('employer'), async (req, res) => {
+// @route   POST /api/jobs
+// @desc    Create a new job posting
+// @access  Private (Employers only)
+router.post('/', protect, authorize('employer'), validateJobCreate, async (req, res, next) => {
   try {
     const job = await Job.create({
       ...req.body,
@@ -16,23 +21,34 @@ router.post('/', protect, authorize('employer'), async (req, res) => {
       job
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.get('/', async (req, res) => {
+// @route   GET /api/jobs
+// @desc    Get all active jobs with filters (CACHED)
+// @access  Public
+router.get('/', cacheMiddleware(300), validatePagination, async (req, res, next) => {
   try {
     const { location, jobType, skills, remote, search } = req.query;
+    const { page, limit } = req.pagination;
+    const skip = (page - 1) * limit;
+    
     let query = { status: 'active' };
+    let sort = { postedAt: -1 };
 
+    // TEXT SEARCH
+    if (search) {
+      query['$text'] = { '$search': search };
+      sort = { score: { '$meta': 'textScore' }, postedAt: -1 };
+    }
+
+    // Location filter
     if (location) {
-      query[''] = [
-        { 'location.city': new RegExp(location, 'i') },
-        { 'location.state': new RegExp(location, 'i') },
-        { 'location.country': new RegExp(location, 'i') }
+      const locationLower = location.toLowerCase();
+      query['$or'] = [
+        { 'location.city': { '$regex': locationLower, '$options': 'i' } },
+        { 'location.state': { '$regex': locationLower, '$options': 'i' } }
       ];
     }
 
@@ -41,36 +57,43 @@ router.get('/', async (req, res) => {
     
     if (skills) {
       const skillArray = skills.split(',').map(s => s.trim());
-      query['requirements.skills'] = { '': skillArray.map(s => new RegExp(s, 'i')) };
+      query['requirements.skills'] = { '$in': skillArray };
     }
+
+    // Count total
+    const total = await Job.countDocuments(query);
+
+    // Execute query
+    let jobsQuery = Job.find(query)
+      .populate('employerId', 'profile.company profile.firstName profile.lastName')
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean(); // Use lean() for better performance
 
     if (search) {
-      query[''] = [
-        { title: new RegExp(search, 'i') },
-        { company: new RegExp(search, 'i') },
-        { description: new RegExp(search, 'i') }
-      ];
+      jobsQuery = jobsQuery.select({ score: { '$meta': 'textScore' } });
     }
 
-    const jobs = await Job.find(query)
-      .populate('employerId', 'profile.company profile.firstName profile.lastName')
-      .sort({ postedAt: -1 })
-      .limit(100);
+    const jobs = await jobsQuery;
 
     res.json({
       success: true,
       count: jobs.length,
+      total: total,
+      page: page,
+      pages: Math.ceil(total / limit),
       jobs
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.get('/matches', protect, authorize('job_seeker'), async (req, res) => {
+// @route   GET /api/jobs/matches
+// @desc    Get matching jobs for current job seeker
+// @access  Private (Job Seekers only)
+router.get('/matches', protect, authorize('job_seeker'), async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
     const matches = await JobMatchingService.findMatchingJobs(req.user.id, limit);
@@ -81,22 +104,24 @@ router.get('/matches', protect, authorize('job_seeker'), async (req, res) => {
       matches
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.get('/:id', async (req, res) => {
+// @route   GET /api/jobs/:id
+// @desc    Get single job by ID (CACHED)
+// @access  Public
+router.get('/:id', cacheMiddleware(600), async (req, res, next) => {
   try {
     const job = await Job.findById(req.params.id)
-      .populate('employerId', 'profile.company profile.firstName profile.lastName email');
+      .populate('employerId', 'profile.company profile.firstName profile.lastName email')
+      .lean();
 
     if (!job) {
       return res.status(404).json({
         success: false,
-        error: 'Job not found'
+        error: 'Job not found',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -105,28 +130,30 @@ router.get('/:id', async (req, res) => {
       job
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.get('/:jobId/candidates', protect, authorize('employer'), async (req, res) => {
+// @route   GET /api/jobs/:jobId/candidates
+// @desc    Get matching candidates for a job
+// @access  Private (Employers only)
+router.get('/:jobId/candidates', protect, authorize('employer'), async (req, res, next) => {
   try {
-    const job = await Job.findById(req.params.jobId);
+    const job = await Job.findById(req.params.jobId).lean();
     
     if (!job) {
       return res.status(404).json({
         success: false,
-        error: 'Job not found'
+        error: 'Job not found',
+        timestamp: new Date().toISOString()
       });
     }
 
     if (job.employerId.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
-        error: 'Not authorized to view candidates for this job'
+        error: 'Not authorized to view candidates for this job',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -139,28 +166,30 @@ router.get('/:jobId/candidates', protect, authorize('employer'), async (req, res
       candidates
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.put('/:id', protect, authorize('employer'), async (req, res) => {
+// @route   PUT /api/jobs/:id
+// @desc    Update job
+// @access  Private (Employers only)
+router.put('/:id', protect, authorize('employer'), async (req, res, next) => {
   try {
     let job = await Job.findById(req.params.id);
 
     if (!job) {
       return res.status(404).json({
         success: false,
-        error: 'Job not found'
+        error: 'Job not found',
+        timestamp: new Date().toISOString()
       });
     }
 
     if (job.employerId.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
-        error: 'Not authorized to update this job'
+        error: 'Not authorized to update this job',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -174,28 +203,30 @@ router.put('/:id', protect, authorize('employer'), async (req, res) => {
       job
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.delete('/:id', protect, authorize('employer'), async (req, res) => {
+// @route   DELETE /api/jobs/:id
+// @desc    Delete job
+// @access  Private (Employers only)
+router.delete('/:id', protect, authorize('employer'), async (req, res, next) => {
   try {
     const job = await Job.findById(req.params.id);
 
     if (!job) {
       return res.status(404).json({
         success: false,
-        error: 'Job not found'
+        error: 'Job not found',
+        timestamp: new Date().toISOString()
       });
     }
 
     if (job.employerId.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
-        error: 'Not authorized to delete this job'
+        error: 'Not authorized to delete this job',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -206,10 +237,7 @@ router.delete('/:id', protect, authorize('employer'), async (req, res) => {
       message: 'Job deleted successfully'
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 

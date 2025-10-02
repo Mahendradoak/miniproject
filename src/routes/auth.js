@@ -3,14 +3,15 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { protect } = require('../middleware/auth');
+const { validateRegister, validateLogin } = require('../middleware/validation');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
+    expiresIn: process.env.JWT_EXPIRE || '30d'
   });
 };
 
-router.post('/register', async (req, res) => {
+router.post('/register', validateRegister, async (req, res, next) => {
   try {
     const { email, password, userType, profile } = req.body;
 
@@ -18,7 +19,8 @@ router.post('/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        error: 'User already exists with this email'
+        error: 'User already exists with this email',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -42,29 +44,20 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', validateLogin, async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide email and password'
-      });
-    }
-
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid credentials'
+        error: 'Invalid credentials',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -72,7 +65,8 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid credentials'
+        error: 'Invalid credentials',
+        timestamp: new Date().toISOString()
       });
     }
 
@@ -89,14 +83,11 @@ router.post('/login', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 
-router.get('/me', protect, async (req, res) => {
+router.get('/me', protect, async (req, res, next) => {
   try {
     res.json({
       success: true,
@@ -108,10 +99,7 @@ router.get('/me', protect, async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    next(error);
   }
 });
 

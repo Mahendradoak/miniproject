@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import '../job_seeker/home_screen.dart';
+import '../job_seeker/swipe_jobs_screen.dart';
 import '../employer/employer_home_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -87,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       if (_userType == 'job_seeker') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const JobSeekerHomeScreen()),
+          MaterialPageRoute(builder: (context) => const SwipeJobsScreen()),
         );
       } else {
         Navigator.pushReplacement(

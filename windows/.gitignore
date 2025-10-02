@@ -15,3 +15,23 @@ x86/
 *.[Cc]ache
 # but keep track of directories ending in .cache
 !*.[Cc]ache/
+
+
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub/
+
+# Build outputs
+build/
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# VS Code
+.vscode/
+
+# Generated files
+*.log

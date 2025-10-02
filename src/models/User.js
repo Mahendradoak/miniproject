@@ -7,17 +7,20 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
+    index: true
   },
   password: { 
     type: String, 
     required: [true, 'Password is required'],
-    minlength: 6
+    minlength: 6,
+    select: false
   },
   userType: { 
     type: String, 
     enum: ['job_seeker', 'employer'], 
-    required: true 
+    required: true,
+    index: true
   },
   profile: {
     firstName: String,
@@ -30,8 +33,11 @@ const userSchema = new mongoose.Schema({
       country: String
     }
   },
-  createdAt: { type: Date, default: Date.now }
-});
+  isActive: { type: Boolean, default: true },
+  lastLoginAt: Date
+}, { timestamps: true });
+
+userSchema.index({ userType: 1, isActive: 1 });
 
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();

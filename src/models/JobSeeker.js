@@ -1,13 +1,12 @@
 ﻿const mongoose = require('mongoose');
 
-// Profile Version Schema - each user can have up to 5 versions
 const profileVersionSchema = new mongoose.Schema({
   name: { 
     type: String, 
     required: true,
     trim: true 
-  }, // e.g., "Frontend Developer", "Full Stack Engineer"
-  description: String, // Optional description of this profile version
+  },
+  description: String,
   skills: [String],
   experience: [{
     title: String,
@@ -42,17 +41,16 @@ const profileVersionSchema = new mongoose.Schema({
   isActive: { 
     type: Boolean, 
     default: false 
-  }, // Only one profile can be active at a time
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  }
+}, { timestamps: true });
 
 const jobSeekerSchema = new mongoose.Schema({
   userId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     required: true,
-    unique: true
+    unique: true,
+    index: true
   },
   profiles: {
     type: [profileVersionSchema],
@@ -63,19 +61,14 @@ const jobSeekerSchema = new mongoose.Schema({
       message: 'Maximum 5 profile versions allowed'
     }
   },
-  activeProfileId: mongoose.Schema.Types.ObjectId, // ID of currently active profile
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  activeProfileId: mongoose.Schema.Types.ObjectId
+}, { timestamps: true });
 
-// Ensure only one profile is marked as active
+jobSeekerSchema.index({ userId: 1, 'profiles.isActive': 1 });
+
 jobSeekerSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  
-  // Count active profiles
   const activeProfiles = this.profiles.filter(p => p.isActive);
   
-  // If multiple profiles are active, keep only the first one
   if (activeProfiles.length > 1) {
     this.profiles.forEach((profile, index) => {
       if (index > 0 && profile.isActive) {
@@ -84,12 +77,10 @@ jobSeekerSchema.pre('save', function(next) {
     });
   }
   
-  // If no active profile but profiles exist, make first one active
   if (activeProfiles.length === 0 && this.profiles.length > 0) {
     this.profiles[0].isActive = true;
   }
   
-  // Set activeProfileId
   const activeProfile = this.profiles.find(p => p.isActive);
   if (activeProfile) {
     this.activeProfileId = activeProfile._id;
@@ -98,12 +89,10 @@ jobSeekerSchema.pre('save', function(next) {
   next();
 });
 
-// Method to get active profile
 jobSeekerSchema.methods.getActiveProfile = function() {
   return this.profiles.find(p => p.isActive) || this.profiles[0];
 };
 
-// Method to switch active profile
 jobSeekerSchema.methods.setActiveProfile = function(profileId) {
   this.profiles.forEach(profile => {
     profile.isActive = profile._id.toString() === profileId.toString();

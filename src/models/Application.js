@@ -4,29 +4,37 @@ const applicationSchema = new mongoose.Schema({
   jobId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Job', 
-    required: true 
+    required: true,
+    index: true
   },
   jobSeekerId: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
-    required: true 
+    required: true,
+    index: true
   },
   status: { 
     type: String, 
     enum: ['pending', 'reviewed', 'shortlisted', 'rejected', 'accepted'],
-    default: 'pending'
+    default: 'pending',
+    index: true
   },
   coverLetter: String,
-  matchScore: { type: Number, min: 0, max: 100 },
-  appliedAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  matchScore: { 
+    type: Number, 
+    min: 0, 
+    max: 100,
+    index: true
+  },
+  appliedAt: { 
+    type: Date, 
+    default: Date.now,
+    index: true
+  }
+}, { timestamps: true });
 
 applicationSchema.index({ jobId: 1, jobSeekerId: 1 }, { unique: true });
-
-applicationSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+applicationSchema.index({ jobSeekerId: 1, status: 1, appliedAt: -1 });
+applicationSchema.index({ jobId: 1, status: 1, matchScore: -1 });
 
 module.exports = mongoose.model('Application', applicationSchema);

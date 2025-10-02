@@ -123,4 +123,24 @@ class JobService {
       return false;
     }
   }
+
+  Future<List<Map<String, dynamic>>> getApplications() async {
+    try {
+      final response = await _apiService.get(
+        '/applications',
+        withAuth: true,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final applicationsList = data['applications'] as List;
+        return applicationsList.map((app) => app as Map<String, dynamic>).toList();
+      } else {
+        throw Exception('Failed to load applications');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
 }
+

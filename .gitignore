@@ -3,3 +3,23 @@
 uploads/
 *.log
 .DS_Store
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Build outputs
+build/
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# VS Code
+.vscode/
+
+# Misc
+*.log
