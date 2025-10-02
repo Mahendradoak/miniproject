@@ -18,7 +18,7 @@ class JobService {
         throw Exception('Failed to load jobs');
       }
     } catch (e) {
-      throw Exception('Error: ' + e.toString());
+      throw Exception('Error: $e');
     }
   }
 
@@ -43,7 +43,7 @@ class JobService {
         throw Exception('Failed to load matching jobs');
       }
     } catch (e) {
-      throw Exception('Error: ' + e.toString());
+      throw Exception('Error: $e');
     }
   }
 

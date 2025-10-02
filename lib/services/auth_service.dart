@@ -41,7 +41,7 @@ class AuthService {
     } catch (e) {
       return {
         'success': false,
-        'error': 'Network error: ' + e.toString(),
+        'error': 'Network error: $e',
       };
     }
   }
@@ -77,7 +77,7 @@ class AuthService {
     } catch (e) {
       return {
         'success': false,
-        'error': 'Network error: ' + e.toString(),
+        'error': 'Network error: $e',
       };
     }
   }

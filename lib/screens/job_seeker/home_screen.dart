@@ -7,7 +7,7 @@ import '../auth/login_screen.dart';
 import 'profile_screen.dart';
 
 class JobSeekerHomeScreen extends StatefulWidget {
-  const JobSeekerHomeScreen({Key? key}) : super(key: key);
+  const JobSeekerHomeScreen({super.key});
 
   @override
   State<JobSeekerHomeScreen> createState() => _JobSeekerHomeScreenState();

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/job_service.dart';
 import 'profile_screen.dart';
 class ProfileManagerScreen extends StatefulWidget {
-  const ProfileManagerScreen({Key? key}) : super(key: key);
+  const ProfileManagerScreen({super.key});
 
   @override
   State<ProfileManagerScreen> createState() => _ProfileManagerScreenState();

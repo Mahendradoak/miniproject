@@ -7,11 +7,11 @@ class JobCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const JobCard({
-    Key? key,
+    super.key,
     required this.job,
     this.matchScore,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   Color _getMatchColor(int score) {
     if (score >= 80) return Colors.green;

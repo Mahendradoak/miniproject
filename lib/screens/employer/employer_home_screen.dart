@@ -3,7 +3,7 @@ import '../../services/auth_service.dart';
 import '../auth/login_screen.dart';
 
 class EmployerHomeScreen extends StatelessWidget {
-  const EmployerHomeScreen({Key? key}) : super(key: key);
+  const EmployerHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
