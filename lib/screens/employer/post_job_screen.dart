@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import '../../services/api_service.dart';
 
 class PostJobScreen extends StatefulWidget {

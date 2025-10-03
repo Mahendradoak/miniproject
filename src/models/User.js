@@ -33,9 +33,14 @@ const userSchema = new mongoose.Schema({
       country: String
     }
   },
-  isActive: { type: Boolean, default: true },
-  lastLoginAt: Date
+   preferences: {
+    darkMode: { type: Boolean, default: false },
+    emailNotifications: { type: Boolean, default: true },
+    pushNotifications: { type: Boolean, default: true },
+    language: { type: String, default: 'en' },
+  },
 }, { timestamps: true });
+
 
 userSchema.index({ userType: 1, isActive: 1 });
 

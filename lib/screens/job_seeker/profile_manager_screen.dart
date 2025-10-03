@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../services/job_service.dart';
+import '../../services/profile_service.dart';
+import '../../models/profile.dart';
 import 'profile_screen.dart';
+
 class ProfileManagerScreen extends StatefulWidget {
   const ProfileManagerScreen({super.key});
 
@@ -9,8 +11,8 @@ class ProfileManagerScreen extends StatefulWidget {
 }
 
 class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
-  final JobService _jobService = JobService();
-  List<dynamic> _profiles = [];
+  final ProfileService _profileService = ProfileService();
+  JobSeekerProfile? _jobSeekerProfile;
   bool _isLoading = true;
 
   @override
@@ -21,42 +23,46 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
 
   Future<void> _loadProfiles() async {
     setState(() => _isLoading = true);
-    
+
     try {
-      final result = await _jobService.getAllProfiles();
+      final profile = await _profileService.getAllProfiles();
       setState(() {
-        _profiles = result['profiles'] ?? [];
+        _jobSeekerProfile = profile;
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading profiles: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading profiles: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _activateProfile(String profileId) async {
-    final success = await _jobService.activateProfile(profileId);
-    
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile activated successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      _loadProfiles();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to activate profile'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    final result = await _profileService.activateProfile(profileId);
+
+    if (mounted) {
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Profile activated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadProfiles();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['error'] ?? 'Failed to activate profile'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -81,50 +87,56 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
     );
 
     if (confirm == true) {
-      final success = await _jobService.deleteProfile(profileId);
-      
-      if (success) {
+      final result = await _profileService.deleteProfile(profileId);
+
+      if (mounted) {
+        if (result['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Profile deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _loadProfiles();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['error'] ?? 'Failed to delete profile'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _duplicateProfile(String profileId) async {
+    final result = await _profileService.duplicateProfile(profileId);
+
+    if (mounted) {
+      if (result['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile deleted successfully'),
+          SnackBar(
+            content: Text(result['message'] ?? 'Profile duplicated successfully'),
             backgroundColor: Colors.green,
           ),
         );
         _loadProfiles();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete profile'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: Text(result['error'] ?? 'Failed to duplicate profile. Maximum 5 profiles allowed.'),
+            backgroundColor: Colors.orange,
           ),
         );
       }
     }
   }
 
-  Future<void> _duplicateProfile(String profileId) async {
-    final success = await _jobService.duplicateProfile(profileId);
-    
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile duplicated successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      _loadProfiles();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to duplicate profile. Maximum 5 profiles allowed.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final profiles = _jobSeekerProfile?.profiles ?? [];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile Versions'),
@@ -132,7 +144,7 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _profiles.isEmpty
+          : profiles.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -177,11 +189,11 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.all(16),
-                        itemCount: _profiles.length,
+                        itemCount: profiles.length,
                         itemBuilder: (context, index) {
-                          final profile = _profiles[index];
-                          final isActive = profile['isActive'] == true;
-                          
+                          final profile = profiles[index];
+                          final isActive = profile.isActive;
+
                           return Card(
                             margin: const EdgeInsets.only(bottom: 16),
                             elevation: isActive ? 4 : 2,
@@ -207,7 +219,7 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    profile['name'] ?? 'Unnamed Profile',
+                                                    profile.name,
                                                     style: const TextStyle(
                                                       fontSize: 18,
                                                       fontWeight: FontWeight.bold,
@@ -235,15 +247,17 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                                                   ),
                                               ],
                                             ),
-                                            if (profile['description'] != null)
+                                            if (profile.description != null && profile.description!.isNotEmpty)
                                               Padding(
                                                 padding: const EdgeInsets.only(top: 4),
                                                 child: Text(
-                                                  profile['description'],
+                                                  profile.description!,
                                                   style: TextStyle(
                                                     color: Colors.grey[600],
                                                     fontSize: 14,
                                                   ),
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
                                           ],
@@ -258,16 +272,21 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                                     children: [
                                       _buildInfoChip(
                                         Icons.code,
-                                        '${(profile['skills'] as List?)?.length ?? 0} skills',
+                                        '${profile.skills.length} skills',
                                       ),
                                       _buildInfoChip(
                                         Icons.work_history,
-                                        '${(profile['experience'] as List?)?.length ?? 0} experiences',
+                                        '${profile.experience.length} experiences',
                                       ),
                                       _buildInfoChip(
                                         Icons.school,
-                                        '${(profile['education'] as List?)?.length ?? 0} education',
+                                        '${profile.education.length} education',
                                       ),
+                                      if (profile.desiredSalary != null)
+                                        _buildInfoChip(
+                                          Icons.attach_money,
+                                          profile.desiredSalary!.formatted,
+                                        ),
                                     ],
                                   ),
                                   const SizedBox(height: 16),
@@ -276,7 +295,7 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                                       if (!isActive)
                                         Expanded(
                                           child: OutlinedButton.icon(
-                                            onPressed: () => _activateProfile(profile['_id']),
+                                            onPressed: () => _activateProfile(profile.id!),
                                             icon: const Icon(Icons.check_circle_outline, size: 18),
                                             label: const Text('Activate'),
                                           ),
@@ -284,15 +303,15 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                                       if (!isActive) const SizedBox(width: 8),
                                       Expanded(
                                         child: OutlinedButton.icon(
-                                          onPressed: () => _duplicateProfile(profile['_id']),
+                                          onPressed: () => _duplicateProfile(profile.id!),
                                           icon: const Icon(Icons.copy, size: 18),
                                           label: const Text('Duplicate'),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      if (_profiles.length > 1)
+                                      if (profiles.length > 1)
                                         IconButton(
-                                          onPressed: () => _deleteProfile(profile['_id']),
+                                          onPressed: () => _deleteProfile(profile.id!),
                                           icon: const Icon(Icons.delete_outline),
                                           color: Colors.red,
                                         ),
@@ -307,7 +326,7 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                     ),
                   ],
                 ),
-      floatingActionButton: _profiles.length < 5
+      floatingActionButton: profiles.length < 5
           ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(
@@ -318,7 +337,7 @@ class _ProfileManagerScreenState extends State<ProfileManagerScreen> {
                 ).then((_) => _loadProfiles());
               },
               icon: const Icon(Icons.add),
-              label: Text('New Profile (${_profiles.length}/5)'),
+              label: Text('New Profile (${profiles.length}/5)'),
             )
           : null,
     );

@@ -1,103 +1,90 @@
 ﻿const mongoose = require('mongoose');
 
-const profileVersionSchema = new mongoose.Schema({
-  name: { 
-    type: String, 
-    required: true,
-    trim: true 
-  },
-  description: String,
-  skills: [String],
-  experience: [{
-    title: String,
-    company: String,
-    startDate: Date,
-    endDate: Date,
-    description: String,
-    current: { type: Boolean, default: false }
-  }],
-  education: [{
-    degree: String,
-    institution: String,
-    field: String,
-    graduationYear: Number
-  }],
-  resume: String,
-  desiredJobTypes: [{ 
-    type: String, 
-    enum: ['full-time', 'part-time', 'contract', 'internship'] 
-  }],
-  desiredSalary: {
-    min: Number,
-    max: Number,
-    currency: { type: String, default: 'USD' }
-  },
-  preferredLocations: [String],
-  remotePreference: { 
-    type: String, 
-    enum: ['remote', 'onsite', 'hybrid', 'any'],
-    default: 'any'
-  },
-  isActive: { 
-    type: Boolean, 
-    default: false 
-  }
-}, { timestamps: true });
-
-const jobSeekerSchema = new mongoose.Schema({
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true,
-    unique: true,
-    index: true
-  },
-  profiles: {
-    type: [profileVersionSchema],
-    validate: {
-      validator: function(profiles) {
-        return profiles.length <= 5;
-      },
-      message: 'Maximum 5 profile versions allowed'
-    }
-  },
-  activeProfileId: mongoose.Schema.Types.ObjectId
-}, { timestamps: true });
-
-jobSeekerSchema.index({ userId: 1, 'profiles.isActive': 1 });
-
-jobSeekerSchema.pre('save', function(next) {
-  const activeProfiles = this.profiles.filter(p => p.isActive);
-  
-  if (activeProfiles.length > 1) {
-    this.profiles.forEach((profile, index) => {
-      if (index > 0 && profile.isActive) {
-        profile.isActive = false;
-      }
-    });
-  }
-  
-  if (activeProfiles.length === 0 && this.profiles.length > 0) {
-    this.profiles[0].isActive = true;
-  }
-  
-  const activeProfile = this.profiles.find(p => p.isActive);
-  if (activeProfile) {
-    this.activeProfileId = activeProfile._id;
-  }
-  
-  next();
+const ExperienceSchema = new mongoose.Schema({
+  title: String,
+  company: String,
+  startDate: Date,
+  endDate: Date,
+  description: String
 });
 
-jobSeekerSchema.methods.getActiveProfile = function() {
-  return this.profiles.find(p => p.isActive) || this.profiles[0];
+const EducationSchema = new mongoose.Schema({
+  degree: String,
+  institution: String,
+  graduationDate: Date,
+  field: String
+});
+
+const CertificationSchema = new mongoose.Schema({
+  title: String,
+  institution: String,
+  issueDate: Date,
+  expiryDate: Date
+});
+
+const ProjectSchema = new mongoose.Schema({
+  name: String,
+  description: String,
+  link: String
+});
+
+const SocialLinkSchema = new mongoose.Schema({
+  type: String,   // 'LinkedIn', 'GitHub', etc.
+  url: String
+});
+
+const ProfileSchema = new mongoose.Schema({
+  name: { type: String, default: 'Default Profile' },
+  description: String,
+  skills: [String],
+  experience: [ExperienceSchema],
+  education: [EducationSchema],
+  certifications: [CertificationSchema],
+  projects: [ProjectSchema],
+  portfolioLinks: [String],
+  socialLinks: [SocialLinkSchema],
+  languages: [String],
+  interests: [String],
+  desiredJobTypes: [String],
+  desiredSalary: {
+    min: Number,
+    max: Number
+  },
+  preferredLocations: [String],
+  remotePreference: { type: String, enum: ['onsite', 'remote', 'hybrid', 'any'] },
+  profileImage: String, // URL or path
+  isActive: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: Date
+});
+
+ProfileSchema.methods.getCompletion = function() {
+  let fieldsTotal = 13; // count the relevant fields for completion
+  let filled = 0;
+  if (this.name) filled++;
+  if (this.description) filled++;
+  if (this.skills && this.skills.length) filled++;
+  if (this.experience && this.experience.length) filled++;
+  if (this.education && this.education.length) filled++;
+  if (this.certifications && this.certifications.length) filled++;
+  if (this.projects && this.projects.length) filled++;
+  if (this.portfolioLinks && this.portfolioLinks.length) filled++;
+  if (this.socialLinks && this.socialLinks.length) filled++;
+  if (this.languages && this.languages.length) filled++;
+  if (this.interests && this.interests.length) filled++;
+  if (this.desiredJobTypes && this.desiredJobTypes.length) filled++;
+  if (this.desiredSalary && (this.desiredSalary.min || this.desiredSalary.max)) filled++;
+  // add more as needed
+  return Math.round((filled / fieldsTotal) * 100);
 };
 
-jobSeekerSchema.methods.setActiveProfile = function(profileId) {
-  this.profiles.forEach(profile => {
-    profile.isActive = profile._id.toString() === profileId.toString();
-  });
-  this.activeProfileId = profileId;
+const JobSeekerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  profiles: [ProfileSchema]
+});
+
+JobSeekerSchema.methods.getActiveProfile = function() {
+  return this.profiles.find(p => p.isActive) || null;
 };
 
-module.exports = mongoose.model('JobSeeker', jobSeekerSchema);
+module.exports = mongoose.model('JobSeeker', JobSeekerSchema);

@@ -1,7 +1,7 @@
 ﻿const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
-const JobMatchingService = require('../services/matchingService');
+const EnhancedJobMatchingService = require('../services/enhancedMatchingService');
 const { protect, authorize } = require('../middleware/auth');
 const { validateJobCreate, validatePagination } = require('../middleware/validation');
 const { cacheMiddleware } = require('../utils/cache');
@@ -96,7 +96,7 @@ router.get('/', cacheMiddleware(300), validatePagination, async (req, res, next)
 router.get('/matches', protect, authorize('job_seeker'), async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
-    const matches = await JobMatchingService.findMatchingJobs(req.user.id, limit);
+    const matches = await EnhancedJobMatchingService.findMatchingJobs(req.user.id, limit);
 
     res.json({
       success: true,
@@ -158,7 +158,7 @@ router.get('/:jobId/candidates', protect, authorize('employer'), async (req, res
     }
 
     const limit = parseInt(req.query.limit) || 50;
-    const candidates = await JobMatchingService.findMatchingCandidates(req.params.jobId, limit);
+    const candidates = await EnhancedJobMatchingService.findMatchingCandidates(req.params.jobId, limit);
 
     res.json({
       success: true,

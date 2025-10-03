@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import '../../services/api_service.dart';
 
 class ApplicationsDashboardScreen extends StatefulWidget {
   const ApplicationsDashboardScreen({super.key});
@@ -10,22 +8,32 @@ class ApplicationsDashboardScreen extends StatefulWidget {
 }
 
 class _ApplicationsDashboardScreenState extends State<ApplicationsDashboardScreen> {
-  final ApiService _apiService = ApiService();
-  final List<dynamic> _applications = [];
-  bool _isLoading = true;
-  final String _filterStatus = 'all';
 
   @override
-  void initState() {
-    super.initState();
-    _loadApplications();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Applications Dashboard'),
+        elevation: 0,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.dashboard, size: 80, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Applications Dashboard',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'View and manage all applications here',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-
-  Future<void> _loadApplications() async {
-    setState(() => _isLoading = true);
-    
-    try {
-      final response = await _apiService.get('/applications', withAuth: true);
-      
-      if (response.statusCode == 200) {
-        final
+}

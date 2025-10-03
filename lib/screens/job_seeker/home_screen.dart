@@ -68,7 +68,7 @@ class _JobSeekerHomeScreenState extends State<JobSeekerHomeScreen>
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SwipeJobsScreen()),
+                  MaterialPageRoute(builder: (context) => const EnhancedSwipeJobsScreen()),
                 );
               },
             ),

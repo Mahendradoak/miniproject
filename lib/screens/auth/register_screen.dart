@@ -87,10 +87,11 @@ class _RegisterScreenState extends State<RegisterScreen>
       if (_userType == 'job_seeker') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const SwipeJobsScreen()),
+          MaterialPageRoute(builder: (context) => const EnhancedSwipeJobsScreen()),
         );
       } else {
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const EmployerHomeScreen()),
         );

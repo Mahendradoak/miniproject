@@ -3,7 +3,7 @@ const router = express.Router();
 const Application = require('../models/Application');
 const Job = require('../models/Job');
 const JobSeeker = require('../models/JobSeeker');
-const JobMatchingService = require('../services/matchingService');
+const EnhancedJobMatchingService = require('../services/enhancedMatchingService');
 const { protect, authorize } = require('../middleware/auth');
 
 router.post('/', protect, authorize('job_seeker'), async (req, res) => {
@@ -52,7 +52,7 @@ router.post('/', protect, authorize('job_seeker'), async (req, res) => {
       });
     }
 
-    const matchScore = JobMatchingService.calculateMatchScore(jobSeeker, job);
+    const matchScore = EnhancedJobMatchingService.calculateMatchScore(jobSeeker, job);
 
     const application = await Application.create({
       jobId,
