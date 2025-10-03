@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../utils/app_colors.dart';
 import 'register_screen.dart';
 import '../job_seeker/home_screen.dart';
 import '../employer/employer_home_screen.dart';
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool _obscurePassword = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -32,6 +34,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       parent: _animationController,
       curve: Curves.easeIn,
     );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    ));
     _animationController.forward();
   }
 
@@ -66,16 +75,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(child: Text(result['error'])),
-              ],
-            ),
-            backgroundColor: Colors.red[700],
+            content: Text(result['error'] ?? 'Login failed'),
+            backgroundColor: AppColors.accentPink,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -84,18 +89,30 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue[700]!,
-              Colors.blue[500]!,
-              Colors.lightBlue[300]!,
-            ],
-          ),
+          gradient: isDark 
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.darkBackground,
+                  AppColors.darkSurface,
+                  AppColors.darkBackground,
+                ],
+              )
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.blue[900]!,
+                  Colors.blue[700]!,
+                  Colors.blue[500]!,
+                ],
+              ),
         ),
         child: SafeArea(
           child: Center(
@@ -103,75 +120,138 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               padding: const EdgeInsets.all(24.0),
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo with gradient glow
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              AppColors.glowShadow(
+                                color: AppColors.primaryPurple,
+                                opacity: 0.5,
+                                blur: 30,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.work_outline,
+                            size: 60,
+                            color: Colors.white,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.work_outline,
-                          size: 60,
-                          color: Colors.blue,
+                        const SizedBox(height: 32),
+                        
+                        // Title with gradient
+                        Text(
+                          'Welcome Back',
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? AppColors.textPrimary : Colors.white,
+                            letterSpacing: 1,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Job Matcher',
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.5,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Sign in to continue your job search',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: isDark 
+                              ? AppColors.textSecondary 
+                              : Colors.white.withOpacity(0.8),
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Find your perfect match',
-                        style: TextStyle(
-                          fontSize: 16,
-                          // ignore: deprecated_member_use
-                          color: Colors.white.withOpacity(0.9),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      Card(
-                        elevation: 8,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
+                        const SizedBox(height: 48),
+                        
+                        // Login Card
+                        Container(
+                          padding: const EdgeInsets.all(32),
+                          decoration: BoxDecoration(
+                            color: isDark 
+                              ? AppColors.darkSurface 
+                              : Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: isDark 
+                              ? Border.all(
+                                  color: AppColors.primaryPurple.withOpacity(0.2),
+                                  width: 1,
+                                )
+                              : null,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                                blurRadius: 30,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
                           child: Form(
                             key: _formKey,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                // Email field
                                 TextFormField(
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(
+                                    color: isDark ? AppColors.textPrimary : Colors.black87,
+                                    fontSize: 16,
+                                  ),
                                   decoration: InputDecoration(
                                     labelText: 'Email',
-                                    prefixIcon: const Icon(Icons.email_outlined),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                    labelStyle: TextStyle(
+                                      color: isDark 
+                                        ? AppColors.textSecondary 
+                                        : Colors.grey[700],
+                                    ),
+                                    hintText: 'Enter your email',
+                                    hintStyle: TextStyle(
+                                      color: isDark 
+                                        ? AppColors.textTertiary 
+                                        : Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
+                                      color: isDark 
+                                        ? AppColors.primaryPurple 
+                                        : Colors.blue,
                                     ),
                                     filled: true,
-                                    fillColor: Colors.grey[50],
+                                    fillColor: isDark 
+                                      ? AppColors.darkSurfaceVariant 
+                                      : Colors.grey[50],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: isDark 
+                                          ? AppColors.primaryPurple.withOpacity(0.2)
+                                          : Colors.transparent,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: isDark 
+                                          ? AppColors.primaryPurple 
+                                          : Colors.blue,
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -184,18 +264,42 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   },
                                 ),
                                 const SizedBox(height: 20),
+                                
+                                // Password field
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: _obscurePassword,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(
+                                    color: isDark ? AppColors.textPrimary : Colors.black87,
+                                    fontSize: 16,
+                                  ),
                                   decoration: InputDecoration(
                                     labelText: 'Password',
-                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    labelStyle: TextStyle(
+                                      color: isDark 
+                                        ? AppColors.textSecondary 
+                                        : Colors.grey[700],
+                                    ),
+                                    hintText: 'Enter your password',
+                                    hintStyle: TextStyle(
+                                      color: isDark 
+                                        ? AppColors.textTertiary 
+                                        : Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outlined,
+                                      color: isDark 
+                                        ? AppColors.primaryPurple 
+                                        : Colors.blue,
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
                                             ? Icons.visibility_outlined
                                             : Icons.visibility_off_outlined,
+                                        color: isDark 
+                                          ? AppColors.textSecondary 
+                                          : Colors.grey[600],
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -203,11 +307,32 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         });
                                       },
                                     ),
+                                    filled: true,
+                                    fillColor: isDark 
+                                      ? AppColors.darkSurfaceVariant 
+                                      : Colors.grey[50],
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
                                     ),
-                                    filled: true,
-                                    fillColor: Colors.grey[50],
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: isDark 
+                                          ? AppColors.primaryPurple.withOpacity(0.2)
+                                          : Colors.transparent,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: isDark 
+                                          ? AppColors.primaryPurple 
+                                          : Colors.blue,
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -216,40 +341,60 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     return null;
                                   },
                                 ),
-                                const SizedBox(height: 24),
-                                ElevatedButton(
-                                  onPressed: _isLoading ? null : _login,
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 2,
-                                  ),
-                                  child: _isLoading
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : const Text(
-                                          'Login',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                const SizedBox(height: 32),
+                                
+                                // Login button with gradient
+                                GradientButton(
+                                  text: _isLoading ? 'Signing in...' : 'Sign In',
+                                  onPressed: _isLoading ? () {} : _login,
+                                  gradient: AppColors.primaryGradient,
+                                  height: 56,
                                 ),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 24),
+                                
+                                // Divider
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Divider(
+                                        color: isDark 
+                                          ? AppColors.textDisabled 
+                                          : Colors.grey[300],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text(
+                                        'or',
+                                        style: TextStyle(
+                                          color: isDark 
+                                            ? AppColors.textSecondary 
+                                            : Colors.grey[600],
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Divider(
+                                        color: isDark 
+                                          ? AppColors.textDisabled 
+                                          : Colors.grey[300],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                
+                                // Register link
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
                                       "Don't have an account? ",
-                                      style: TextStyle(color: Colors.grey[600]),
+                                      style: TextStyle(
+                                        color: isDark 
+                                          ? AppColors.textSecondary 
+                                          : Colors.grey[600],
+                                      ),
                                     ),
                                     TextButton(
                                       onPressed: () {
@@ -260,10 +405,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           ),
                                         );
                                       },
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: isDark 
+                                          ? AppColors.primaryPurple 
+                                          : Colors.blue,
+                                      ),
                                       child: const Text(
                                         'Register',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
                                       ),
                                     ),
@@ -273,8 +424,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

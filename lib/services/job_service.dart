@@ -123,7 +123,58 @@ class JobService {
       return false;
     }
   }
+  // Get matches with detailed breakdown
+Future<List<Map<String, dynamic>>> getMatchesWithBreakdown() async {
+  final response = await _apiService.get(
+    '/jobs/matches-enhanced',
+    withAuth: true,
+  );
 
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return List<Map<String, dynamic>>.from(data['matches'] ?? []);
+  }
+  
+  throw Exception('Failed to load matches');
+}
+
+// Get match breakdown for specific job
+Future<Map<String, dynamic>> getMatchBreakdown(String jobId) async {
+  final response = await _apiService.get(
+    '/jobs/$jobId/match-breakdown',
+    withAuth: true,
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  }
+  
+  throw Exception('Failed to load match breakdown');
+}
+
+// Track swipe action
+Future<void> trackSwipe(String jobId, String action) async {
+  await _apiService.post(
+    '/jobs/$jobId/swipe',
+    {'action': action},
+    withAuth: true,
+  );
+}
+
+// Get swipe statistics
+Future<Map<String, dynamic>> getSwipeStats() async {
+  final response = await _apiService.get(
+    '/user/swipe-stats',
+    withAuth: true,
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['stats'];
+  }
+  
+  return {};
+}
   Future<List<Map<String, dynamic>>> getApplications() async {
     try {
       final response = await _apiService.get(
