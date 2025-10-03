@@ -166,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             fontSize: 16,
                             color: isDark 
                               ? AppColors.textSecondary 
-                              : Colors.white.withOpacity(0.8),
+                              : Colors.white.withValues(alpha:0.8),
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -182,13 +182,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             borderRadius: BorderRadius.circular(24),
                             border: isDark 
                               ? Border.all(
-                                  color: AppColors.primaryPurple.withOpacity(0.2),
+                                  color: AppColors.primaryPurple.withValues(alpha:0.2),
                                   width: 1,
                                 )
                               : null,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                                color: Colors.black.withValues(alpha:isDark ? 0.3 : 0.1),
                                 blurRadius: 30,
                                 offset: const Offset(0, 10),
                               ),
@@ -238,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
                                         color: isDark 
-                                          ? AppColors.primaryPurple.withOpacity(0.2)
+                                          ? AppColors.primaryPurple.withValues(alpha:0.2)
                                           : Colors.transparent,
                                         width: 1,
                                       ),
@@ -319,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       borderRadius: BorderRadius.circular(12),
                                       borderSide: BorderSide(
                                         color: isDark 
-                                          ? AppColors.primaryPurple.withOpacity(0.2)
+                                          ? AppColors.primaryPurple.withValues(alpha:0.2)
                                           : Colors.transparent,
                                         width: 1,
                                       ),

@@ -15,11 +15,13 @@ class ThemeProvider extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     final savedMode = _prefs.getInt('themeMode') ?? ThemeMode.system.index;
     _themeMode = ThemeMode.values[savedMode];
+    print('Theme loaded: $_themeMode'); // Debug log
     notifyListeners();
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
+    print('Theme set to: $mode'); // Debug log
     await _prefs.setInt('themeMode', mode.index);
     notifyListeners();
   }

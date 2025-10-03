@@ -41,7 +41,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading applications: $e');
+      debugPrint('Error loading applications: $e');
       setState(() => _isLoading = false);
       
       if (mounted) {
@@ -122,7 +122,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha:0.3),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -198,7 +198,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: statusColor),
                     ),
@@ -409,7 +409,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(status).withOpacity(0.1),
+                    color: _getStatusColor(status).withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: _getStatusColor(status)),
                   ),

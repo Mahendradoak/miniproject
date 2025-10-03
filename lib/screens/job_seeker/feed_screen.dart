@@ -346,7 +346,7 @@ class _FeedScreenState extends State<FeedScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.2),
+                    color: statusColor.withValues(alpha:0.2),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: statusColor),
                   ),

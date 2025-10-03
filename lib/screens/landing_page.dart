@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
 
 class LandingPage extends StatelessWidget {
-  const LandingPage({Key? key}) : super(key: key);
+  const LandingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class LandingPage extends StatelessWidget {
           'AI-powered job matching connecting talent with opportunity',
           style: TextStyle(
             fontSize: 18,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha:0.9),
             height: 1.5,
           ),
           textAlign: TextAlign.center,
@@ -95,7 +95,7 @@ class LandingPage extends StatelessWidget {
                 'AI-powered job matching connecting talent with opportunity.\nJoin thousands of job seekers and employers.',
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha:0.9),
                   height: 1.6,
                 ),
               ),
@@ -117,14 +117,14 @@ class LandingPage extends StatelessWidget {
     return Container(
       height: 400,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Center(
         child: Icon(
           Icons.work_outline,
           size: 200,
-          color: Colors.white.withOpacity(0.3),
+          color: Colors.white.withValues(alpha:0.3),
         ),
       ),
     );
@@ -257,7 +257,7 @@ class LandingPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 20,
             offset: Offset(0, 4),
           ),
@@ -463,7 +463,7 @@ class LandingPage extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 18,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha:0.9),
           ),
         ),
       ],
@@ -624,5 +624,5 @@ class LandingPage extends StatelessWidget {
           ),
         )).toList(),
       ],
-    );
+    );S
   }

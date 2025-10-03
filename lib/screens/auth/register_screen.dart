@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
-import 'login_screen.dart';
 import '../job_seeker/home_screen.dart';
 import '../employer/employer_home_screen.dart';
 
@@ -174,7 +173,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                           fontSize: 14,
                           color: isDark 
                             ? AppColors.textSecondary 
-                            : Colors.white.withOpacity(0.8),
+                            : Colors.white.withValues(alpha:0.8),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -214,13 +213,13 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
                           borderRadius: BorderRadius.circular(24),
                           border: isDark 
                             ? Border.all(
-                                color: AppColors.primaryPurple.withOpacity(0.2),
+                                color: AppColors.primaryPurple.withValues(alpha:0.2),
                                 width: 1,
                               )
                             : null,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                              color: Colors.black.withValues(alpha:isDark ? 0.3 : 0.1),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),
@@ -484,7 +483,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             color: isSelected 
               ? Colors.transparent 
               : (isDark 
-                  ? AppColors.primaryPurple.withOpacity(0.2) 
+                  ? AppColors.primaryPurple.withValues(alpha:0.2) 
                   : Colors.grey[300]!),
             width: 2,
           ),
@@ -555,7 +554,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
           color: isDark 
-            ? AppColors.primaryPurple.withOpacity(0.2)
+            ? AppColors.primaryPurple.withValues(alpha:0.2)
             : Colors.transparent,
           width: 1,
         ),

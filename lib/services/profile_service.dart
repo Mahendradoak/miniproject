@@ -1,208 +1,193 @@
 import 'dart:convert';
-import 'api_service.dart';
+import 'package:http/http.dart' as http;
+import '../utils/constants.dart';
 import '../models/profile.dart';
 
 class ProfileService {
-  final ApiService _apiService = ApiService();
+  final String baseUrl = AppConstants.baseUrl;
 
-  // Get all profile versions
-  Future<JobSeekerProfile?> getAllProfiles() async {
-    try {
-      final response = await _apiService.get('/profile/job-seeker', withAuth: true);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['success'] == true && data['jobSeeker'] != null) {
-          return JobSeekerProfile.fromJson(data['jobSeeker']);
-        }
-      } else if (response.statusCode == 404) {
-        // No profile exists yet
-        return null;
-      }
-      throw Exception('Failed to load profiles: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('Error loading profiles: ${e.toString()}');
-    }
+  // Get auth token from storage
+  Future<String?> _getToken() async {
+    // TODO: Get from secure storage
+    return 'your-token-here';
   }
 
-  // Get active profile only
-  Future<ProfileVersion?> getActiveProfile() async {
-    try {
-      final response = await _apiService.get('/profile/job-seeker/active', withAuth: true);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['success'] == true && data['profile'] != null) {
-          return ProfileVersion.fromJson(data['profile']);
-        }
-      } else if (response.statusCode == 404) {
-        // No active profile exists yet
-        return null;
-      }
-      throw Exception('Failed to load active profile: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('Error loading active profile: ${e.toString()}');
-    }
+  Future<Map<String, String>> _getHeaders() async {
+    final token = await _getToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
   }
 
-  // Create new profile version
-  Future<Map<String, dynamic>> createProfile(ProfileVersion profileData) async {
+  // Get all profiles for current user
+  Future<Map<String, dynamic>> getAllProfiles() async {
     try {
-      final response = await _apiService.post(
-        '/profile/job-seeker',
-        profileData.toJson(),
-        withAuth: true,
+      final response = await http.get(
+        Uri.parse('$baseUrl${AppConstants.profileEndpoint}'),
+        headers: await _getHeaders(),
       );
 
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         return {
           'success': true,
-          'jobSeeker': data['jobSeeker'] != null
-              ? JobSeekerProfile.fromJson(data['jobSeeker'])
-              : null,
+          'profiles': data['jobSeeker']['profiles'] ?? [],
+          'activeProfile': data['activeProfile'],
         };
       } else {
         return {
           'success': false,
-          'error': data['error'] ?? 'Failed to create profile',
+          'error': 'Failed to load profiles',
         };
       }
     } catch (e) {
       return {
         'success': false,
-        'error': 'Error creating profile: ${e.toString()}',
+        'error': e.toString(),
       };
     }
   }
 
-  // Update specific profile version
+  // Create new profile
+  Future<Map<String, dynamic>> createProfile(Map<String, dynamic> profileData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl${AppConstants.profileEndpoint}'),
+        headers: await _getHeaders(),
+        body: jsonEncode(profileData),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': jsonDecode(response.body),
+        };
+      } else {
+        final error = jsonDecode(response.body);
+        return {
+          'success': false,
+          'error': error['error'] ?? 'Failed to create profile',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  // Update specific profile
   Future<Map<String, dynamic>> updateProfile(
     String profileId,
     Map<String, dynamic> profileData,
   ) async {
     try {
-      final response = await _apiService.put(
-        '/profile/job-seeker/$profileId',
-        profileData,
-        withAuth: true,
+      final response = await http.put(
+        Uri.parse('$baseUrl${AppConstants.profileEndpoint}/$profileId'),
+        headers: await _getHeaders(),
+        body: jsonEncode(profileData),
       );
 
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (response.statusCode == 200) {
         return {
           'success': true,
-          'profile': data['profile'] != null
-              ? ProfileVersion.fromJson(data['profile'])
-              : null,
+          'data': jsonDecode(response.body),
         };
       } else {
         return {
           'success': false,
-          'error': data['error'] ?? 'Failed to update profile',
+          'error': 'Failed to update profile',
         };
       }
     } catch (e) {
       return {
         'success': false,
-        'error': 'Error updating profile: ${e.toString()}',
+        'error': e.toString(),
       };
     }
   }
 
-  // Activate a profile version
+  // Activate a profile
   Future<Map<String, dynamic>> activateProfile(String profileId) async {
     try {
-      final response = await _apiService.post(
-        '/profile/job-seeker/$profileId/activate',
-        {},
-        withAuth: true,
+      final response = await http.post(
+        Uri.parse('$baseUrl${AppConstants.profileEndpoint}/$profileId/activate'),
+        headers: await _getHeaders(),
       );
 
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (response.statusCode == 200) {
         return {
           'success': true,
-          'message': data['message'] ?? 'Profile activated successfully',
-          'activeProfile': data['activeProfile'] != null
-              ? ProfileVersion.fromJson(data['activeProfile'])
-              : null,
+          'data': jsonDecode(response.body),
         };
       } else {
         return {
           'success': false,
-          'error': data['error'] ?? 'Failed to activate profile',
+          'error': 'Failed to activate profile',
         };
       }
     } catch (e) {
       return {
         'success': false,
-        'error': 'Error activating profile: ${e.toString()}',
+        'error': e.toString(),
       };
     }
   }
 
-  // Delete profile version
-  Future<Map<String, dynamic>> deleteProfile(String profileId) async {
-    try {
-      final response = await _apiService.delete(
-        '/profile/job-seeker/$profileId',
-        withAuth: true,
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
-        return {
-          'success': true,
-          'message': data['message'] ?? 'Profile deleted successfully',
-        };
-      } else {
-        return {
-          'success': false,
-          'error': data['error'] ?? 'Failed to delete profile',
-        };
-      }
-    } catch (e) {
-      return {
-        'success': false,
-        'error': 'Error deleting profile: ${e.toString()}',
-      };
-    }
-  }
-
-  // Duplicate profile version
+  // Duplicate profile
   Future<Map<String, dynamic>> duplicateProfile(String profileId) async {
     try {
-      final response = await _apiService.post(
-        '/profile/job-seeker/$profileId/duplicate',
-        {},
-        withAuth: true,
+      final response = await http.post(
+        Uri.parse('$baseUrl${AppConstants.profileEndpoint}/$profileId/duplicate'),
+        headers: await _getHeaders(),
       );
 
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data['success'] == true) {
+      if (response.statusCode == 200) {
         return {
           'success': true,
-          'message': data['message'] ?? 'Profile duplicated successfully',
-          'newProfile': data['newProfile'] != null
-              ? ProfileVersion.fromJson(data['newProfile'])
-              : null,
+          'data': jsonDecode(response.body),
         };
       } else {
+        final error = jsonDecode(response.body);
         return {
           'success': false,
-          'error': data['error'] ?? 'Failed to duplicate profile',
+          'error': error['error'] ?? 'Failed to duplicate profile',
         };
       }
     } catch (e) {
       return {
         'success': false,
-        'error': 'Error duplicating profile: ${e.toString()}',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  // Delete profile
+  Future<Map<String, dynamic>> deleteProfile(String profileId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl${AppConstants.profileEndpoint}/$profileId'),
+        headers: await _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'data': jsonDecode(response.body),
+        };
+      } else {
+        final error = jsonDecode(response.body);
+        return {
+          'success': false,
+          'error': error['error'] ?? 'Failed to delete profile',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'error': e.toString(),
       };
     }
   }

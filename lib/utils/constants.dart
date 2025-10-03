@@ -43,6 +43,8 @@ class AppConstants {
   static const int jobsPerPage = 20;
   static const int applicationsPerPage = 10;
   
+static const String profileEndpoint = '/profile/job-seeker';
+
   // Cache Duration
   static const Duration cacheExpiry = Duration(hours: 1);
 }

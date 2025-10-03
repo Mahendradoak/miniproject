@@ -411,13 +411,13 @@ class _JobSeekerHomeScreenState extends State<JobSeekerHomeScreen>
                           gradient: LinearGradient(
                             colors: [
                               _getMatchColor(matchScore),
-                              _getMatchColor(matchScore).withOpacity(0.7),
+                              _getMatchColor(matchScore).withValues(alpha:0.7),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: _getMatchColor(matchScore).withOpacity(0.3),
+                              color: _getMatchColor(matchScore).withValues(alpha:0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -584,7 +584,7 @@ class _JobSeekerHomeScreenState extends State<JobSeekerHomeScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

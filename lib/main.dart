@@ -67,17 +67,13 @@ class MyApp extends StatelessWidget {
           
           // Surface colors - Rich dark backgrounds
           surface: Color(0xFF1E1B2E),           // Deep Purple-Black
-          surfaceVariant: Color(0xFF2D2640),    // Slightly lighter purple
-          
-          // Background - True dark with slight warmth
-          background: Color(0xFF0F0E1A),        // Very dark purple-black
+          surfaceContainerHighest: Color(0xFF2D2640),    // Slightly lighter purple
           
           // Text colors
           onPrimary: Colors.white,
           onSecondary: Colors.white,
           onSurface: Color(0xFFE5E5E5),         // Light gray text
           onSurfaceVariant: Color(0xFFB4B4B4),  // Muted text
-          onBackground: Color(0xFFE5E5E5),
           
           // Error colors
           error: Color(0xFFEF4444),             // Bright red
@@ -105,7 +101,7 @@ class MyApp extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: const Color(0xFF8B5CF6).withOpacity(0.1),
+              color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
               width: 1,
             ),
           ),
@@ -122,7 +118,7 @@ class MyApp extends StatelessWidget {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: const Color(0xFF8B5CF6).withOpacity(0.2),
+              color: const Color(0xFF8B5CF6).withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -330,7 +326,7 @@ class AppGradients {
     end: Alignment.bottomRight,
     colors: [
       const Color(0xFF1E1B2E),
-      const Color(0xFF2D2640).withOpacity(0.5),
+      const Color(0xFF2D2640).withValues(alpha: 0.5),
     ],
   );
 }

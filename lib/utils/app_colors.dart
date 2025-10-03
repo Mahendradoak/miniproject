@@ -69,7 +69,7 @@ class AppColors {
     end: Alignment.bottomRight,
     colors: [
       darkSurface,
-      darkSurfaceVariant.withOpacity(0.7),
+      darkSurfaceVariant.withValues(alpha:0.7),
     ],
   );
   
@@ -140,7 +140,7 @@ class AppColors {
     double spread = 0,
   }) {
     return BoxShadow(
-      color: color.withOpacity(opacity),
+      color: color.withValues(alpha:opacity),
       blurRadius: blur,
       spreadRadius: spread,
       offset: const Offset(0, 4),
@@ -149,7 +149,7 @@ class AppColors {
   
   /// Subtle shadow for elevation
   static BoxShadow cardShadow = BoxShadow(
-    color: Colors.black.withOpacity(0.1),
+    color: Colors.black.withValues(alpha:0.1),
     blurRadius: 10,
     offset: const Offset(0, 2),
   );
@@ -179,7 +179,7 @@ class GradientButton extends StatelessWidget {
   final double borderRadius;
   
   const GradientButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.gradient = AppColors.primaryGradient,
@@ -187,7 +187,7 @@ class GradientButton extends StatelessWidget {
     this.width,
     this.height = 56,
     this.borderRadius = 12,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -237,13 +237,13 @@ class GradientCard extends StatelessWidget {
   final List<BoxShadow>? boxShadow;
   
   const GradientCard({
-    Key? key,
+    super.key,
     required this.child,
     this.gradient,
     this.padding,
     this.borderRadius = 16,
     this.boxShadow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +253,7 @@ class GradientCard extends StatelessWidget {
         gradient: gradient ?? AppColors.cardGradient,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: AppColors.primaryPurple.withOpacity(0.1),
+          color: AppColors.primaryPurple.withValues(alpha:0.1),
           width: 1,
         ),
         boxShadow: boxShadow ?? [AppColors.cardShadow],

@@ -36,9 +36,11 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -51,21 +53,25 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Application status updated'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Application status updated'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
         _loadApplications();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -271,7 +277,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(status).withOpacity(0.2),
+                      color: _getStatusColor(status).withValues(alpha:0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -376,7 +382,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                       .map((status) => ChoiceChip(
                             label: Text(status),
                             selected: application['status'] == status,
-                            selectedColor: _getStatusColor(status).withOpacity(0.3),
+                            selectedColor: _getStatusColor(status).withValues(alpha:0.3),
                             onSelected: (selected) {
                               if (selected) {
                                 _updateApplicationStatus(application['_id'], status);

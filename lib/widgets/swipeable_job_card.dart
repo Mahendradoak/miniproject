@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:job_platform_app/providers/theme_provider.dart'; // Adjust package name
-import 'package:job_platform_app/models/job.dart'; // Adjust package name
 import '../models/job.dart';
 
 
@@ -13,13 +11,13 @@ class SwipeableJobCard extends StatefulWidget {
   final VoidCallback onTap;
 
   const SwipeableJobCard({
-    Key? key,
+    super.key,
     required this.job,
     this.matchScore,
     required this.onSwipeLeft,
     required this.onSwipeRight,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<SwipeableJobCard> createState() => _SwipeableJobCardState();
@@ -27,7 +25,6 @@ class SwipeableJobCard extends StatefulWidget {
 
 class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerProviderStateMixin {
   Offset _position = Offset.zero;
-  bool _isDragging = false;
   double _angle = 0;
   late AnimationController _animationController;
 
@@ -44,7 +41,7 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
   }
 
   void _onPanStart(DragStartDetails details) {
-    setState(() => _isDragging = true);
+    // Pan started
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
@@ -55,7 +52,6 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
   }
 
   void _onPanEnd(DragEndDetails details) {
-    setState(() => _isDragging = false);
     final screenWidth = MediaQuery.of(context).size.width;
     final threshold = screenWidth * 0.3;
 
@@ -139,7 +135,7 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: _position.dx > 0 ? Colors.green.withOpacity(0.9) : Colors.red.withOpacity(0.9),
+                          color: _position.dx > 0 ? Colors.green.withValues(alpha:0.9) : Colors.red.withValues(alpha:0.9),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -233,7 +229,7 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
                                 (skill) => Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue[50]?.withOpacity(brightness == Brightness.dark ? 0.2 : 1),
+                                    color: Colors.blue[50]?.withValues(alpha:brightness == Brightness.dark ? 0.2 : 1),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(color: Colors.blue[100]!),
                                   ),
@@ -250,7 +246,7 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               '+${widget.job.requirements!.skills!.length - 6} more skills',
-                              style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontStyle: FontStyle.italic),
+                              style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color?.withValues(alpha:0.6), fontStyle: FontStyle.italic),
                             ),
                           ),
                         const SizedBox(height: 24),
@@ -258,14 +254,14 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.swipe_left, color: theme.iconTheme.color?.withOpacity(0.4)),
+                              Icon(Icons.swipe_left, color: theme.iconTheme.color?.withValues(alpha:0.4)),
                               const SizedBox(width: 8),
                               Text(
                                 'Swipe or use buttons below',
-                                style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontStyle: FontStyle.italic),
+                                style: TextStyle(fontSize: 13, color: theme.textTheme.bodyMedium?.color?.withValues(alpha:0.5), fontStyle: FontStyle.italic),
                               ),
                               const SizedBox(width: 8),
-                              Icon(Icons.swipe_right, color: theme.iconTheme.color?.withOpacity(0.4)),
+                              Icon(Icons.swipe_right, color: theme.iconTheme.color?.withValues(alpha:0.4)),
                             ],
                           ),
                         ),
@@ -285,9 +281,9 @@ class _SwipeableJobCardState extends State<SwipeableJobCard> with SingleTickerPr
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha:0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

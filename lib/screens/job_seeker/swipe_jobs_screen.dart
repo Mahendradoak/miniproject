@@ -6,7 +6,7 @@ import 'package:job_platform_app/widgets/swipeable_job_card.dart'; // Adjust pac
 import 'package:job_platform_app/models/job.dart'; // Adjust package name
 
 class EnhancedSwipeJobsScreen extends StatefulWidget {
-  const EnhancedSwipeJobsScreen({Key? key}) : super(key: key);
+  const EnhancedSwipeJobsScreen({super.key});
 
   @override
   State<EnhancedSwipeJobsScreen> createState() => _EnhancedSwipeJobsScreenState();
@@ -93,7 +93,7 @@ class _EnhancedSwipeJobsScreenState extends State<EnhancedSwipeJobsScreen> with 
                     themeProvider.setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
                   },
                   activeColor: theme.primaryColor,
-                  activeTrackColor: theme.primaryColor.withOpacity(0.5),
+                  activeTrackColor: theme.primaryColor.withValues(alpha:0.5),
                 ),
               ],
             ),
@@ -251,7 +251,7 @@ class _EnhancedSwipeJobsScreenState extends State<EnhancedSwipeJobsScreen> with 
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha:0.3),
               blurRadius: 10,
               spreadRadius: 2,
             ),

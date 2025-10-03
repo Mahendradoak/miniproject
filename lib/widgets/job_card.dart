@@ -1,7 +1,4 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:job_platform_app/providers/theme_provider.dart'; // Adjust package name
-import 'package:job_platform_app/utils/responsive.dart'; // Adjust package name
-import 'package:job_platform_app/models/job.dart'; // Adjust package name
 import '../models/job.dart';
 import '../utils/responsive.dart';
 
@@ -34,7 +31,7 @@ class JobCard extends StatelessWidget {
       child: Card(
         margin: EdgeInsets.symmetric(horizontal: cardPadding / 2, vertical: 8),
         elevation: 3,
-        shadowColor: theme.shadowColor.withOpacity(0.1),
+        shadowColor: theme.shadowColor.withValues(alpha:0.1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: theme.cardColor,
         child: InkWell(
@@ -47,7 +44,7 @@ class JobCard extends StatelessWidget {
                   ? LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [theme.cardColor, _getMatchColor(matchScore!, brightness).withOpacity(0.05)],
+                      colors: [theme.cardColor, _getMatchColor(matchScore!, brightness).withValues(alpha:0.05)],
                     )
                   : null,
             ),
@@ -71,7 +68,7 @@ class JobCard extends StatelessWidget {
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                Icon(Icons.business, size: 14, color: theme.iconTheme.color?.withOpacity(0.6)),
+                                Icon(Icons.business, size: 14, color: theme.iconTheme.color?.withValues(alpha:0.6)),
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
@@ -94,13 +91,13 @@ class JobCard extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: [
                                 _getMatchColor(matchScore!, brightness),
-                                _getMatchColor(matchScore!, brightness).withOpacity(0.8),
+                                _getMatchColor(matchScore!, brightness).withValues(alpha:0.8),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: _getMatchColor(matchScore!, brightness).withOpacity(0.3),
+                                color: _getMatchColor(matchScore!, brightness).withValues(alpha:0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -137,7 +134,7 @@ class JobCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.green[50]?.withOpacity(brightness == Brightness.dark ? 0.2 : 1),
+                        color: Colors.green[50]?.withValues(alpha:brightness == Brightness.dark ? 0.2 : 1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.green[200]!),
                       ),
@@ -163,7 +160,7 @@ class JobCard extends StatelessWidget {
                           .map((skill) => Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue[50]?.withOpacity(brightness == Brightness.dark ? 0.2 : 1),
+                                  color: Colors.blue[50]?.withValues(alpha:brightness == Brightness.dark ? 0.2 : 1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: Colors.blue[100]!),
                                 ),
@@ -179,7 +176,7 @@ class JobCard extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 6),
                         child: Text(
                           '+${job.requirements!.skills!.length - 4} more skills',
-                          style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6), fontStyle: FontStyle.italic),
+                          style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withValues(alpha:0.6), fontStyle: FontStyle.italic),
                         ),
                       ),
                   ],
@@ -189,9 +186,9 @@ class JobCard extends StatelessWidget {
                     children: [
                       Text(
                         'Tap to view details',
-                        style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5), fontStyle: FontStyle.italic),
+                        style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withValues(alpha:0.5), fontStyle: FontStyle.italic),
                       ),
-                      Icon(Icons.arrow_forward_ios, size: 14, color: theme.iconTheme.color?.withOpacity(0.4)),
+                      Icon(Icons.arrow_forward_ios, size: 14, color: theme.iconTheme.color?.withValues(alpha:0.4)),
                     ],
                   ),
                 ],
@@ -207,9 +204,9 @@ class JobCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha:0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
